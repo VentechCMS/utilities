@@ -48,7 +48,8 @@ CREATE OR REPLACE PROCEDURE data_dump (
                             write_action_in IN VARCHAR2 DEFAULT 'W',
                             array_size_in   IN PLS_INTEGER DEFAULT 1000,
                             delimiter_in    IN VARCHAR2 DEFAULT NULL,
-                            dump_code_in    IN BOOLEAN DEFAULT FALSE) AUTHID CURRENT_USER IS
+                            dump_code_in    IN BOOLEAN DEFAULT FALSE,
+                            header_row_in   IN BOOLEAN DEFAULT FALSE) AUTHID CURRENT_USER IS
 
    v_fh           UTL_FILE.FILE_TYPE;
    v_ch           BINARY_INTEGER      := DBMS_SQL.OPEN_CURSOR;
@@ -63,6 +64,7 @@ CREATE OR REPLACE PROCEDURE data_dump (
    v_nls_date_fmt VARCHAR2(30)        := nls_date_fmt_in;
    v_dummy        NUMBER;
    v_type         VARCHAR2(8);
+   v_header_row   VARCHAR2(32767);
    t_describe     DBMS_SQL.DESC_TAB;
    t_plsql        DBMS_SQL.VARCHAR2A;
 
@@ -96,7 +98,7 @@ BEGIN
    put('   v_eol    VARCHAR2(2);');
    put('   v_eollen PLS_INTEGER;');
    put('   CURSOR cur_sql IS');
-   put('      '||REPLACE(v_sql,'"','''''')||';');
+   put('      '||v_sql||';');
 
    /* Now loop through the describe table to declare arrays in the dynamic PL/SQL... */
    FOR i IN t_describe.FIRST .. t_describe.LAST LOOP
@@ -125,7 +127,7 @@ BEGIN
    put(q'[   END enclose_and_escape;                                                                                                                      ]');
    put(q'[                                                                                                                                                ]');
 
-   /* Syntax to set the date format to preserve time in the output, open the out file and start to collect... */
+   /* Set the date format to preserve time in the output, open the out file... */
    put('BEGIN');
    put('   EXECUTE IMMEDIATE ''ALTER SESSION SET NLS_DATE_FORMAT = '''''||v_nls_date_fmt||''''''';');
    put('   v_eol := CASE');
@@ -136,6 +138,20 @@ BEGIN
    put('   v_eollen := LENGTH(v_eol);');
    put('   v_fh := UTL_FILE.FOPEN('''||v_dir||''','''||v_outfile||''','''||v_write_action||''');');
    put('   OPEN cur_sql;');
+
+   /* Create and print a header row... */
+   IF header_row_in THEN
+      v_header_row := 'enclose_and_escape('''||t_describe(1).col_name||''')';
+      FOR i IN t_describe.FIRST + 1 .. t_describe.LAST LOOP
+         v_header_row := v_header_row||'||'''||delimiter_in||'''||enclose_and_escape('''||t_describe(i).col_name||''')';
+      END LOOP;
+
+      put('   --Print header.');
+      put('   UTL_FILE.PUT(v_fh, '||v_header_row||');');
+      put('   UTL_FILE.NEW_LINE(v_fh);');
+   END IF;
+
+   /* Start to collect... */
    put('   LOOP');
    put('      FETCH cur_sql');
 
