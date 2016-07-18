@@ -136,7 +136,7 @@ BEGIN
    put('               ELSE CHR(10)');
    put('            END;');
    put('   v_eollen := LENGTH(v_eol);');
-   put('   v_fh := UTL_FILE.FOPEN('''||v_dir||''','''||v_outfile||''','''||v_write_action||''');');
+   put('   v_fh := UTL_FILE.FOPEN('''||v_dir||''','''||v_outfile||''','''||v_write_action||''', 32767);');
    put('   OPEN cur_sql;');
 
    /* Create and print a header row... */
