@@ -1,3 +1,4 @@
+CREATE OR REPLACE PROCEDURE data_dump(
 -- ---------------------------------------------------------------------------------------------------
 --
 -- Script:      data_dump.sql
@@ -5,13 +6,13 @@
 -- Author:      Adrian Billington
 --              www.oracle-developer.net
 --
--- Description: A standalone procedure to dump the results of a query to delimited flat-file. This 
+-- Description: A standalone procedure to dump the results of a query to delimited flat-file. This
 --              utility supports Oracle 8i upwards.
 --
---              Note that the dynamic code that is built to perform the data dump can optionally be 
---              written to a separate file. 
+--              Note that the dynamic code that is built to perform the data dump can optionally be
+--              written to a separate file.
 --
--- Usage:       Usage is quite simple. A dynamic query is passed in as a parameter. As this uses 
+-- Usage:       Usage is quite simple. A dynamic query is passed in as a parameter. As this uses
 --              DBMS_SQL to parse the SQL, all expressions must have an alias.
 --
 --              a) Dump the contents of a table
@@ -37,10 +38,8 @@
 --                 /
 --
 --             See list of parameters for the various other options available.
--- 
+--
 -- ---------------------------------------------------------------------------------------------------
-
-CREATE OR REPLACE PROCEDURE data_dump (
                             query_in        IN VARCHAR2,
                             file_in         IN VARCHAR2,
                             directory_in    IN VARCHAR2,
