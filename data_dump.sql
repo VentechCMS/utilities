@@ -53,7 +53,7 @@ CREATE OR REPLACE PROCEDURE data_dump(
    v_fh           UTL_FILE.FILE_TYPE;
    v_ch           BINARY_INTEGER      := DBMS_SQL.OPEN_CURSOR;
    v_sql          VARCHAR2(32767)     := query_in;
-   v_dir          VARCHAR2(512)       := directory_in;
+   v_dir          VARCHAR2(512)       := upper(directory_in);
    v_outfile      VARCHAR2(128)       := file_in;
    v_sqlfile      VARCHAR2(128)       := file_in||'.sql';
    v_arr_size     PLS_INTEGER         := array_size_in;
@@ -105,6 +105,8 @@ BEGIN
          v_type := 'NUMBER';
       ELSIF t_describe(i).col_type = 12 THEN
          v_type := 'DATE';
+      ELSIF t_describe(i).col_type = 113 THEN
+         v_type := 'BLOB';
       ELSE
          v_type := 'VARCHAR2';
       END IF;
@@ -179,7 +181,12 @@ BEGIN
 
    /* Write enclosed and escaped values... */
    FOR i IN t_describe.FIRST .. t_describe.LAST LOOP
-      put('            UTL_FILE.PUT(v_fh,'''||v_delimiter||''' ||enclose_and_escape("'||t_describe(i).col_name||'"(i)));');
+      /* Some data types are not currently supported... */
+      IF t_describe(i).col_type = 113 THEN
+         put('            UTL_FILE.PUT(v_fh,'''||v_delimiter||''' ||enclose_and_escape(''WARNING - BLOB type is not supported''));');
+      ELSE
+         put('            UTL_FILE.PUT(v_fh,'''||v_delimiter||''' ||enclose_and_escape("'||t_describe(i).col_name||'"(i)));');
+      END IF;
       v_delimiter := NVL(delimiter_in,',');
    END LOOP;
 
