@@ -95,7 +95,6 @@ BEGIN
    put('DECLARE');
    put('   v_fh     UTL_FILE.FILE_TYPE;');
    put('   v_eol    VARCHAR2(2);');
-   put('   v_eollen PLS_INTEGER;');
    put('   CURSOR cur_sql IS');
    put('      '||v_sql||';');
 
@@ -136,7 +135,6 @@ BEGIN
    put('               THEN CHR(13)||CHR(10)');
    put('               ELSE CHR(10)');
    put('            END;');
-   put('   v_eollen := LENGTH(v_eol);');
    put('   v_fh := UTL_FILE.FOPEN('''||v_dir||''','''||v_outfile||''','''||v_write_action||''', 32767);');
    put('   OPEN cur_sql;');
 
